@@ -1,0 +1,4 @@
+User-agent: *
+# API endpoints hit the trade site and poe.ninja; crawlers rendering the page should not spend those rate limits.
+Disallow: /price
+Disallow: /ninja
