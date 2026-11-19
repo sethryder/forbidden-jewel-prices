@@ -24,4 +24,4 @@ node test.js           # cache self-check
   `https://www.pathofexile.com/api/trade/data/stats` and needs refreshing when ascendancies change.
 - Requests send a User-Agent with your `CONTACT`, as GGG and poe.ninja ask.
 
-Not affiliated with Grinding Gear Games. Jewel icons belong to GGG.
+Code is MIT licensed (see `LICENSE`). Not affiliated with Grinding Gear Games. The jewel icons belong to GGG and are not covered by the MIT license.
