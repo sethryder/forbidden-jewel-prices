@@ -12,7 +12,7 @@ Needs Node 20.12+ and no dependencies.
 ```sh
 cp .env.example .env   # set CONTACT to an email or URL
 node server.js         # http://localhost:8080
-node test.js           # cache self-check
+node --test test.js    # tests, no network needed
 ```
 
 ## How it works
