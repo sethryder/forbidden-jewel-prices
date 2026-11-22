@@ -115,4 +115,4 @@ if (require.main === module) {
   if (!CONTACT && !process.env.USER_AGENT) console.warn("warning: set CONTACT (email or URL) so GGG and poe.ninja can reach you; see .env.example");
   server.listen(process.env.PORT || 8080, () => console.log(`listening on ${server.address().port}, User-Agent: ${UA}`));
 }
-module.exports = { cached };
+module.exports = { cached, server };
