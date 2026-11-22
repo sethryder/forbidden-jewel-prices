@@ -49,11 +49,12 @@
   }
   .brand { margin: 0; font: 500 1.05rem var(--sc); color: var(--dim); }
   .league { color: var(--dim); font-size: .95rem; }
-  .league input {
-    width: 9ch; margin-left: .35rem; padding: .1rem 0;
+  .league select {
+    margin-left: .35rem; padding: .1rem 0;
     font: inherit; color: var(--bone); background: none;
     border: 0; border-bottom: 1px solid rgb(232 223 211 / .25);
   }
+  .league option { background: #0f0a0c; }
 
   main { max-width: 46rem; margin: 0 auto; padding: 0 16px 3rem; }
   #notable {
@@ -130,7 +131,7 @@
 
 <header>
   <h1 class="brand">Forbidden Flame &amp; Flesh</h1>
-  <label class="league">League<input id="league" value="Covens" spellcheck="false"></label>
+  <label class="league">League<select id="league"><option>Standard</option></select></label>
 </header>
 <main>
   <div class="picker">
@@ -251,13 +252,12 @@ const ninjaByLeague = {};
 const getJson = url => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
 
 async function render() {
-  const notable = $("notable").value, info = NOTABLES[notable], league = $("league").value.trim();
-  const current = () => $("notable").value === notable && $("league").value.trim() === league; // user hasn't moved on
+  const notable = $("notable").value, info = NOTABLES[notable], league = $("league").value;
+  const current = () => $("notable").value === notable && $("league").value === league; // user hasn't moved on
   $("asof").textContent = "";
-  if (!info || !league) {
+  if (!info) {
     $("pair").dataset.state = "empty";
-    $("hint").textContent = !league ? "Enter a league name to search."
-      : notable ? (matches(notable).length ? "Keep typing, or pick a notable from the list." : "No ascendancy notable matches that.") : "Type an ascendancy notable to price both halves of the pair.";
+    $("hint").textContent = notable ? (matches(notable).length ? "Keep typing, or pick a notable from the list." : "No ascendancy notable matches that.") : "Type an ascendancy notable to price both halves of the pair.";
     return;
   }
   $("hint").textContent = `${info.ascendancy} notable`;
@@ -287,5 +287,11 @@ async function render() {
     + (nj ? "Estimates and trends from poe.ninja." : "");
 }
 $("notable").addEventListener("input", () => { suggest(); render(); });
-$("league").addEventListener("change", render);
+$("league").addEventListener("change", () => { localStorage.league = $("league").value; render(); });
+getJson("leagues").then(leagues => {
+  if (!leagues?.length) return;
+  $("league").replaceChildren(...leagues.map(l => new Option(l)));
+  $("league").value = leagues.includes(localStorage.league) ? localStorage.league : leagues[0]; // current challenge league first
+  render();
+});
 </script>
