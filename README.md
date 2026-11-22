@@ -18,6 +18,7 @@ node test.js           # cache self-check
 ## How it works
 
 - `server.js` serves the page and two cached endpoints:
+  - `/leagues`: tradeable PC leagues, current challenge league first, cached for an hour.
   - `/ninja?league=`: every Forbidden jewel price in one poe.ninja request, cached for 30 minutes (poe.ninja's own cache time).
   - `/price?league=&opt=`: live trade search for one notable. It returns the 10 cheapest listings and their median, cached for 24 hours.
 - `notables.json`: notable name → trade-site option id and ascendancy. It comes from

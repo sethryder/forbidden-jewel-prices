@@ -51,8 +51,14 @@ const ninja = league => cached(`ninja|${league}`, async () => {
   return { fetchedAt: new Date().toISOString(), notables };
 }, NINJA_TTL);
 
-const leagues = () => cached("leagues", async () =>
-  new Set((await trade("/api/trade/data/leagues")).result.filter(l => l.realm === "pc").map(l => l.id)));
+// /api/trade/data/leagues sometimes comes back empty; this one lists everything. SSF can't trade, so drop it.
+// Challenge leagues first, so the page's default is the current one. Hourly, so new leagues show up on their own.
+const leagues = () => cached("leagues", async () => {
+  const all = (await trade("/api/leagues?type=main&realm=pc")).filter(l => !l.rules?.some(r => r.id === "NoParties"));
+  if (!all.length) throw new Error("no leagues listed");
+  const std = l => l.category?.id === "Standard";
+  return [...all.filter(l => !std(l)), ...all.filter(std)].map(l => l.id);
+}, 3600e3);
 
 async function price(league, opt) {
   const out = { fetchedAt: new Date().toISOString() };
@@ -86,14 +92,15 @@ function send(res, status, body, type = "application/json") {
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url, "http://localhost");
   try {
+    if (u.pathname === "/leagues") return send(res, 200, await leagues());
     if (u.pathname === "/price") {
       const league = u.searchParams.get("league"), opt = Number(u.searchParams.get("opt"));
-      if (!OPTS.has(opt) || !(await leagues()).has(league)) return send(res, 400, { error: "unknown league or notable" });
+      if (!OPTS.has(opt) || !(await leagues()).includes(league)) return send(res, 400, { error: "unknown league or notable" });
       return send(res, 200, await cached(`${league}|${opt}`, () => price(league, opt)));
     }
     if (u.pathname === "/ninja") {
       const league = u.searchParams.get("league");
-      if (!(await leagues()).has(league)) return send(res, 400, { error: "unknown league" });
+      if (!(await leagues()).includes(league)) return send(res, 400, { error: "unknown league" });
       return send(res, 200, await ninja(league));
     }
     const file = STATIC[u.pathname];
